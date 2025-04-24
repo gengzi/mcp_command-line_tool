@@ -13,3 +13,10 @@ spring:
         name: mcp_command-line_tool
         version: 1.0.0
 
+
+ssh:
+  host:
+  port: 22
+  username:
+  passwd:
+  privatekeypath:

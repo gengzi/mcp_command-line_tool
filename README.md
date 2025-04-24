@@ -11,7 +11,11 @@ https://github.com/gengzi/mcp_command-line_tool
 ./mvn clean install
 ```
 
-### mcp服务配置：
+### 特别注意
+执行命令时，仅仅拦截了rm 删除操作，其他命令都未拦截。
+如果操作不可撤销的命令时，请谨慎操作，由于是大模型来操作工具，可能操作不可撤销的命令。
+
+### mcp服务配置
 
 Cherry studio config：
 ```json
@@ -38,4 +42,5 @@ Cherry studio config：
 
 ![img](./img/demo.jpeg)
 ![img](./img/demo2.jpeg)
+
 
