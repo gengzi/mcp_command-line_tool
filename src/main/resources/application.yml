@@ -1,0 +1,15 @@
+logging:
+  file:
+    name: ./mcp.log
+  pattern:
+    console:
+spring:
+  main:
+    banner-mode: off
+    web-application-type: none
+  ai:
+    mcp:
+      server:
+        name: mcp_command-line_tool
+        version: 1.0.0
+
