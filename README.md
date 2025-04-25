@@ -1,5 +1,5 @@
 # mcp_command-line_tool
-使用spring ai框架，实现的mcp服务：用于在当前电脑执行本地命令
+使用spring ai框架，实现的mcp服务：用于在当前电脑执行本地命令，也可以连接远程ssh，执行远程命令
 
 ### 先决条件
 MCP 服务器需要 Java 17 或更高版本。

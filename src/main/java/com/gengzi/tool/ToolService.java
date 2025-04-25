@@ -56,7 +56,7 @@ public class ToolService {
         for (String comStr : com) {
             if(StrSplitter.split(commandStr," ",0,true,true).stream().anyMatch(
                     val->{
-                       return val.contains(comStr);
+                       return val.equals(comStr);
                     }
             )){
                 return "此命令未执行，因为此命令操作不可撤销，需要让用户再次确认是否执行";
@@ -72,7 +72,7 @@ public class ToolService {
         for (String comStr : com) {
             if(StrSplitter.split(commandStr," ",0,true,true).stream().anyMatch(
                     val->{
-                        return val.contains(comStr);
+                        return val.equals(comStr);
                     }
             )){
                 return "此命令不支持执行，需要用户手动操作执行";
@@ -82,15 +82,19 @@ public class ToolService {
     }
 
 
+    @Tool(description = "获取远程服务器的操作系统信息")
+    public String cloudOs() {
+        return  "Linux";
+    }
 
-    @Tool(description = "远程服务器已链接，可以执行命令")
+
+    @Tool(description = "远程系统环境执行对应的命令")
     public String cloudCommand(
             @ToolParam(description = "待执行的远程命令") String commandStr) throws JSchException, IOException {
-        Session session = null;
+        Session session;
         // 使用密钥登录
         JSch jsch = new JSch();
         if(StrUtil.isNotBlank(sshConfig.getPrivatekeypath()) ) {
-
             // 添加私钥
             // 读取私钥文件内容为字符串（确保是 PEM 格式）
             jsch.addIdentity(sshConfig.getPrivatekeypath());
@@ -98,18 +102,17 @@ public class ToolService {
 //            // 将私钥内容直接传入（适用于内存中已有私钥字符串的场景）
 //            jsch.addIdentity("id_rsa", privateKeyContent.getBytes(), null, null);
             session = jsch.getSession(sshConfig.getUsername(), sshConfig.getHost(), sshConfig.getPort());
+        } else{
+            //新建会话
+            session = JschUtil.getSession(
+                    sshConfig.getHost(),
+                    sshConfig.getPort(),
+                    sshConfig.getUsername(),
+                    sshConfig.getPasswd());
         }
-//        }else{
-//            //新建会话
-//            session = JschUtil.getSession(
-//                    sshConfig.getHost(),
-//                    sshConfig.getPort(),
-//                    sshConfig.getUsername(),
-//                    sshConfig.getPasswd());
-//        }
         // 避免第一次连接服务器时需要确认公钥的问题
         session.setConfig("StrictHostKeyChecking", "no");
-        session.setConfig("PreferredAuthentications", "publickey,keyboard-interactive,password");
+//        session.setConfig("PreferredAuthentications", "publickey,keyboard-interactive,password");
         session.connect();
         return executeCommand(session, commandStr);
     }
@@ -119,7 +122,11 @@ public class ToolService {
         StringBuilder result = new StringBuilder();
         try {
             Channel channel = session.openChannel("exec");
-            ((ChannelExec) channel).setCommand(command);
+//            ((ChannelExec) channel).setCommand(command);
+
+            // 使用登录shell执行命令，确保加载用户环境配置（如~/.bashrc中的别名）
+            ((ChannelExec) channel).setCommand(String.format("/bin/sh  -c \"%s\"", escapeSpecialCharacters(command)));
+
 
             channel.setInputStream(null);
             ((ChannelExec) channel).setErrStream(System.err);
@@ -139,6 +146,11 @@ public class ToolService {
             e.printStackTrace();
         }
         return result.toString();
+    }
+
+    private String escapeSpecialCharacters(String command) {
+        // 转义特殊字符以防止shell注入攻击
+        return command.replace("\"", "\\\"").replace("\\", "\\\\").replace("`", "\\`");
     }
 
 

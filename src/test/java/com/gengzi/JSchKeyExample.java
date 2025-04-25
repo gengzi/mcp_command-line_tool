@@ -35,7 +35,7 @@ public class JSchKeyExample {
             session.setConfig("StrictHostKeyChecking", "no");
             session.setConfig("PreferredAuthentications", "publickey,keyboard-interactive,password");
             session.connect();
-            String echoHello = executeCommand(session, "ll");
+            String echoHello = executeCommand(session, "date");
             System.out.printf("echoHello: %s\n", echoHello);
 
 
